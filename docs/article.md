@@ -258,7 +258,37 @@ final Authenticator authenticator = new Authenticator() {
 
 ![Message Inheritance](images/message-inheritance.png)
 
-todo добавить картинку со структурой письма
+Электронные письма представляются с помощью абстрактного класса `Message`, 
+у которого есть один наследник - `MimeMessage` (реализации различных 
+протоколов могут дополнительно расширять этот класс).
+
+**todo нарисовать и добавить картинку со структурой письма**
+
+Электронное письмо состоит из метаинформации: отправитель, получатели, тема, 
+дата отправки и др.,- и основной части: текст и вложения.
+Основная часть письма представлена в виде фрагментов `BodyPart`, которые 
+хранятся в контейнере `Multipart`. Подробнее о фрагментах - ниже.
+
+Для установки получателей у класса `Message` есть внутренний класс 
+`RecipientType`, который представляет собой различные виды адресантов:
+* `TO` - прямой получатель;
+* `CC` - получатель копии;
+* `BCC` -  получатель скрытой копии.
+
+Поля с такими названиями можно найти в интерфейсе любого почтового клиента 
+при написании письма.
+![Recipients types](images/recipients-types.png)
+**todo сделать нормальный скрин**
+
+```java
+final MimeMessage mimeMessage = new MimeMessage(session);
+mimeMessage.setFrom("artem.boiar@yandex.ru");
+mimeMessage.setRecipients(Message.RecipientType.TO, "joshua.bloch@google.com");
+mimeMessage.setRecipients(Message.RecipientType.CC, "tagir.valeev@jetbrains.com");
+mimeMessage.setRecipients(Message.RecipientType.BCC, "sergey.egorov@pivotal.com");
+mimeMessage.setSubject("Java 20 new hot features");
+```
+
 
 #### Флаги
 
@@ -306,6 +336,48 @@ InternetAddress[] recipients = InternetAddress.parse(
 
 
 ### Фрагменты письма
+
+Фрагмент письма состоит из трех частей:
+1. Атрибуты - неявная метаинформация;
+2. Заголовки - явная метаинформация;
+3. Контент - полезная нагрузка, которую необходимо переслать адресанту.
+
+Фрагмент письма может либо относиться к основной части письма - `INLINE`, 
+либо быть вложением - `ATTACHMENT`, что определяется параметром `disposition`.
+
+У интерфейса Part несколько реализаций. 
+Для представления фрагмента письма используется абстрактный класс `BodyPart`, 
+наследником которого является класс `MimeBodyPart`.
+Но помимо этого интерфейс `Part` реализуется самим классом `Message`. 
+
+Наиболее часто используемые MIME-типы для частей: 
+`text/plain` для основной части письма и 
+`application/octet-stream` для вложений.
+
+#### Запись контента
+**todo переписать в повествовательном ключе**
+
+Для записи контента определены следующие методы:
+* `void setText(String)` - записывает текст в качестве тела фрагмента.
+* `void setContent(Object, String)` - записывает переданный объект в приложение в соответствие с указанным MIME-типом.
+* `void attachFile(File)` - записывает файл в фрагмент
+
+#### Чтение контента
+Для чтения контента из пришедшего письма определены следующие методы:
+* `DataHandler getDataHandler()`
+* `void saveFile(File)` - записывает контент в указанный файл
+* `void writeTo(OutputStream)` - перенаправляет контент, в указанный поток
+
+#### Мультифрагменты
+Фрагменты `BodyPart` могут объединяться в структуру `Multipart`. 
+`MimeBodyPart` соответственно объединяются в структуру `MimeMultipart`.
+
+Основные методы мультифрагментов:
+* `String getContentType()` - возвращает тип контента. Обычно - multipart/mixed
+* `int getCount()` - возвращает количество фрагментов, записанных в мультифрагмент
+* `BodyPart getBodyPart(int)` - возвращает фрагмент по его индексу
+* `void addBodyPart(BodyPart)` - добавляет фрагмент в объект
+
 
 ### Папка с письмами
 
@@ -372,7 +444,7 @@ final Message[] foundMessages = folder.search(termsSummary);
 
 
 -------------------------------------------------
-## Список источников
+## Список источников и полезных ресурсов
 #### 1 часть
 * В. Олифер, Н. Олифер. Компьютерные сети.
 * Википедия. [Электронная почта][wiki-email]
@@ -382,8 +454,14 @@ final Message[] foundMessages = folder.search(termsSummary);
 [habr-protocols]: https://habr.com/ru/post/307714/
 
 #### 2 часть
+* [Официальная документация][jakarta-mail-docs]
+* [Github репозиторий][jakarta-mail-git]
+* [Настройки почтовых серверов][mail-properties]
+* Книга Eliote Rusty Harold. JavaMail API - 2013.
 
 [mail-properties]: https://javaee.github.io/javamail/docs/api/overview-summary.html
+[jakarta-mail-docs]: https://eclipse-ee4j.github.io/mail/
+[jakarta-mail-git]: https://github.com/eclipse-ee4j/mail
 
 #### 3 часть
 
