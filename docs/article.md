@@ -270,7 +270,7 @@ final Authenticator authenticator = new Authenticator() {
 Каждое письмо привязывается к конкретной сессии. 
 При создании нового письма в конструктор передается объект сессии:
 ```java
-final MimeMessage mimeMessage = new MimeMessage(session);
+final Message message = new MimeMessage(session);
 ```
 
 Для установки значений полей метаинформации используются обычные сеттеры.
@@ -287,11 +287,11 @@ final MimeMessage mimeMessage = new MimeMessage(session);
 **todo сделать нормальный скрин**
 
 ```java
-mimeMessage.setFrom("artem.boiar@yandex.ru");
-mimeMessage.setRecipients(Message.RecipientType.TO, "joshua.bloch@google.com");
-mimeMessage.setRecipients(Message.RecipientType.CC, "tagir.valeev@jetbrains.com");
-mimeMessage.setRecipients(Message.RecipientType.BCC, "sergey.egorov@pivotal.com");
-mimeMessage.setSubject("Java 20 new hot features");
+message.setFrom("artem.boiar@yandex.ru");
+message.setRecipients(Message.RecipientType.TO, "joshua.bloch@google.com");
+message.setRecipients(Message.RecipientType.CC, "tagir.valeev@jetbrains.com");
+message.setRecipients(Message.RecipientType.BCC, "sergey.egorov@pivotal.com");
+message.setSubject("Java 20 new hot features");
 ```
 
 
@@ -379,6 +379,7 @@ final MimeBodyPart attachment = new MimeBodyPart();
 mailBody.setText("Java 20 new features.\nLook at the attachments.");
 attachment.attachFile(file);
 ```
+MIME-тип вложения определяется автоматически по расширению файла. 
 
 #### Чтение контента
 Для чтения контента из пришедшего письма можно воспользоваться методом
@@ -460,8 +461,16 @@ final Message[] foundMessages = folder.search(termsSummary);
 -------------------------------------------------
 ## 3. Работа с электронной почтой в среде Spring
 
-Для удобства использования библиотеки с Spring окружением была разработана 
-библиотека Spring Email.
+Для удобства использования библиотеки Jakarta Mail в Spring-приложениях 
+была разработана библиотека Spring Email.
+Все классы библиотеки находятся в пакете `org.springframework.mail`.
+
+В большинстве Java-приложений не требуется читать письма с почтового сервера,
+чаще всего необходимо только рассылать электронную почту, например для 
+подтверждения регистрации в вашем веб-приложении.
+В связи с этим Spring Mail предоставляет API только для отправки писем.
+
+![Spring Email Scheme](images/spring-email-scheme.jpg)
 
 
 -------------------------------------------------
@@ -487,7 +496,9 @@ final Message[] foundMessages = folder.search(termsSummary);
 [javax-mail-info]: http://java-online.ru/javax-mail.xhtml
 
 #### 3 часть
-
+* [Официальная документация][spring-email-docs]
+* [Видеоурок по отправке писем с помощью Spring Email][spring-email-videolesson]
 
 [habr-spring-email]: https://habr.com/ru/post/439176/
-
+[spring-email-docs]: https://docs.spring.io/spring/docs/5.1.18.BUILD-SNAPSHOT/spring-framework-reference/integration.html#mail
+[spring-email-videolesson]: https://www.youtube.com/watch?v=yBXs_gtSmUc&t=1s&ab_channel=letsCode
