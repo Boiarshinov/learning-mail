@@ -1,0 +1,4 @@
+List of new Features:
+- Dynamic types;
+- Primitive types deprecation;
+- New Standard Log API.

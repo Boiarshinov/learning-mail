@@ -9,7 +9,7 @@ import java.util.Properties;
 public class PropUtils {
     public static Properties getMailProperties() {
         try {
-            final InputStream inputStream = ClassLoader.getSystemResourceAsStream("javamail.properties");
+            final InputStream inputStream = ClassLoader.getSystemResourceAsStream("jakarta-mail-transport.properties");
             final InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.ISO_8859_1);
             final Properties mailProperties = new Properties();
             mailProperties.load(reader);
