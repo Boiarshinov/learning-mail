@@ -61,7 +61,7 @@ Zimbra.
 клиента Б и удалены с почтового сервера. 
 При использовании протокола IMAP клиенту Б будут переданы копии писем, 
 а оригиналы останутся храниться на почтовом сервере.
-![Email transition](images/email-transition.jpg)
+![Email transition](images/01-email-transition.jpg)
 
 ### Электронное письмо
 
@@ -254,13 +254,13 @@ final Authenticator authenticator = new Authenticator() {
 
 ### Письма
 
-![Message Inheritance](images/message-inheritance.png)
+![Message Inheritance](images/02-message-inheritance.png)
 
 Электронные письма представляются с помощью абстрактного класса `Message`, 
 у которого есть один наследник - `MimeMessage` (реализации различных 
 протоколов могут дополнительно расширять этот класс).
 
-**todo нарисовать и добавить картинку со структурой письма**
+![Message scheme](images/03-jakarta-mail-message.png)
 
 Электронное письмо состоит из метаинформации: отправитель, получатели, тема, 
 дата отправки и др.,- и основной части: текст и вложения.
@@ -283,8 +283,8 @@ final Message message = new MimeMessage(session);
 
 Поля с такими названиями можно найти в интерфейсе любого почтового клиента 
 при написании письма.
-![Recipients types](images/recipients-types.png)
-**todo сделать нормальный скрин**
+
+![Recipients types](images/04-recipients-types.png)
 
 ```java
 message.setFrom("artem.boiar@yandex.ru");
@@ -470,7 +470,7 @@ final Message[] foundMessages = folder.search(termsSummary);
 подтверждения регистрации в вашем веб-приложении.
 В связи с этим Spring Mail предоставляет API только для отправки писем.
 
-![Spring Email Scheme](images/spring-email-scheme.jpg)
+![Spring Email Scheme](images/05-spring-email-scheme.jpg)
 
 
 -------------------------------------------------
