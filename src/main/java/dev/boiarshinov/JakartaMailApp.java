@@ -78,7 +78,7 @@ public class JakartaMailApp {
         mailBody.setText("Java 20 new features");
 
         final MimeBodyPart attachment1 = new MimeBodyPart();
-        attachment1.attachFile(getFile());
+        attachment1.attachFile(FileUtils.getFile());
 
 //        final MimeBodyPart attachment2 = new MimeBodyPart();
 //        final FileDataSource fileDataSource = new FileDataSource(getFile());
@@ -95,10 +95,5 @@ public class JakartaMailApp {
             multipart.addBodyPart(bodyPart);
         }
         return multipart;
-    }
-
-    private File getFile() throws URISyntaxException {
-        final URL resource = ClassLoader.getSystemResource("java_new_features.txt");
-        return Paths.get(resource.toURI()).toFile();
     }
 }

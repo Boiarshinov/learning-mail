@@ -472,6 +472,10 @@ final Message[] foundMessages = folder.search(termsSummary);
 
 ![Spring Email Scheme](images/05-spring-email-scheme.jpg)
 
+Основные сущности:
+- `JavaMailSender` - основной класс, связывающий Java-код с почтовым
+сервером. Заменяет собой сессию и транспорт из Jakarta Mail.
+- ``
 
 -------------------------------------------------
 ## Список источников и полезных ресурсов
@@ -497,8 +501,10 @@ final Message[] foundMessages = folder.search(termsSummary);
 
 #### 3 часть
 * [Официальная документация][spring-email-docs]
+* [Гайд по Spring Email][baeldung-spring-email] на Baeldung
 * [Видеоурок по отправке писем с помощью Spring Email][spring-email-videolesson]
 
 [habr-spring-email]: https://habr.com/ru/post/439176/
 [spring-email-docs]: https://docs.spring.io/spring/docs/5.1.18.BUILD-SNAPSHOT/spring-framework-reference/integration.html#mail
+[baeldung-spring-email]: https://www.baeldung.com/spring-email
 [spring-email-videolesson]: https://www.youtube.com/watch?v=yBXs_gtSmUc&t=1s&ab_channel=letsCode
