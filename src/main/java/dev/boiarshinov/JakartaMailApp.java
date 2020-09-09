@@ -1,18 +1,11 @@
 package dev.boiarshinov;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.mail.javamail.JavaMailSender;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
