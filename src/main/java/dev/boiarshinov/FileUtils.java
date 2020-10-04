@@ -11,4 +11,9 @@ public class FileUtils {
         final URL resource = ClassLoader.getSystemResource("java_new_features.txt");
         return Paths.get(resource.toURI()).toFile();
     }
+
+    public static File getImage() throws URISyntaxException {
+        final URL resource = ClassLoader.getSystemResource("picture.jpg");
+        return Paths.get(resource.toURI()).toFile();
+    }
 }

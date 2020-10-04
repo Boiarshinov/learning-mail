@@ -1,5 +1,10 @@
 # Электронная почта и работа с ней в Java-приложениях
 
+`Disclaimer` Статья написана для новичков и тех, кому хочется шаг за шагом
+понять как устроена работа с электронной почтой из Java-приложений. 
+Желающие быстро понять как отправлять электронные письма из 
+Spring-приложений могут сразу переходить к 3 части.
+
 Эту статью я решил написать, потому что не нашел русскоязычных 
 источников про работу c электронной почтой из Java, описывающих 
 имеющиеся библиотеки достаточно полно.
@@ -50,8 +55,7 @@ Zimbra.
 вроде Outlook или The Bat!, либо веб-приложения вроде Gmail или Яндекс.Почта.
 
 Предположим, что человек А решил отправить письмо человеку Б. 
-Он пишет его на своем компьютере (телефоне / планшете) и нажимает 
-кнопку "отправить". 
+Он пишет его в своем почтовом клиенте и нажимает кнопку "отправить". 
 Письмо отправляется по протоколу SMTP на почтовый сервер клиента А.
 Этот почтовый сервер пересылает письмо почтовому серверу клиенту Б 
 также при помощи протокола SMTP.
@@ -61,7 +65,7 @@ Zimbra.
 клиента Б и удалены с почтового сервера. 
 При использовании протокола IMAP клиенту Б будут переданы копии писем, 
 а оригиналы останутся храниться на почтовом сервере.
-![Email transition](images/01-email-transition.jpg)
+![Email transition](images/01-email-transition.png)
 
 ### Электронное письмо
 
@@ -240,13 +244,12 @@ final Authenticator authenticator = new Authenticator() {
 Почти все сущности, представляющие какие-либо объекты предметной
 области, представлены абстрактными классами, реализация которых 
 зависит от конкретного протокола: 
-* `Message`, представляющий электронное письмо;
-* `BodyPart`, представляющий фрагмент электронного письма: основная часть 
-или вложение;
-* `Address`, представляющий адрес отправителя или получателя;
-* `Folder`, представляющий собой папку, в которой хранятся электронные письма;
-* `SearchTerm`, представляющий собой условие поиска в папке по письмам;
-* `MailEvent` для обработки событий (получение письма). 
+* `Message` - электронное письмо;
+* `BodyPart` - фрагмент электронного письма: основная часть или вложение;
+* `Address` - адрес отправителя или получателя;
+* `Folder` - папка, в которой хранятся электронные письма;
+* `SearchTerm` - условие поиска писем в папке;
+* `MailEvent` - событие, произошедшее с письмом.
 Обработка событий основывается на паттерне Наблюдатель.
 
 *Примечание* - в данной статье обработка событий не рассмотрена.
@@ -336,7 +339,7 @@ InternetAddress[] recipients = InternetAddress.parse(
 ```
 
 *Примечание* - для валидации адресов электронной почты, приходящих от 
-пользователя в виде строк можно пользоваться аннотацией `@Email`, 
+пользователя в виде строк, можно пользоваться аннотацией `@Email`, 
 объявленной в библиотеке **Bean Validation**.
 
 
@@ -374,12 +377,12 @@ final MimeBodyPart attachment = new MimeBodyPart();
 После создания фрагмента необходимо записать в него полезную нагрузку.
 Для основной части используется метод `setText()`, а для вложения - 
 `attachFile()` или `setContent()`.
-**todo написать про DataHandler**
 ```java
 mailBody.setText("Java 20 new features.\nLook at the attachments.");
 attachment.attachFile(file);
 ```
-MIME-тип вложения определяется автоматически по расширению файла. 
+MIME-тип вложения в большинстве случаев определяется автоматически 
+по расширению файла. 
 
 #### Чтение контента
 Для чтения контента из пришедшего письма можно воспользоваться методом
@@ -392,7 +395,7 @@ MIME-тип вложения определяется автоматически
 ```java
 final Multipart multipart = new MimeMultipart();
 for (BodyPart bodyPart: bodyParts) {
-    //cannot use streams because of throwing exception
+    //cannot use streams because of checked exception
     multipart.addBodyPart(bodyPart);
 }
 ```
@@ -462,46 +465,146 @@ final Message[] foundMessages = folder.search(termsSummary);
 ## 3. Работа с электронной почтой в среде Spring
 
 Для удобства использования библиотеки Jakarta Mail в Spring-приложениях 
-была разработана библиотека Spring Email.
-Все классы библиотеки находятся в пакете `org.springframework.mail`.
+была разработана библиотека Spring Email, которая по сути является
+фасадом к API Jakarta Mail.
+Все классы библиотеки находятся в пакете `org.springframework.mail`, 
+который можно подтянуть с помощью зависимости `spring-boot-starter-mail`.
 
 В большинстве Java-приложений не требуется читать письма с почтового сервера,
-чаще всего необходимо только рассылать электронную почту, например для 
-подтверждения регистрации в вашем веб-приложении.
-В связи с этим Spring Mail предоставляет API только для отправки писем.
+чаще всего необходимо только рассылать электронную почту (например для 
+подтверждения регистрации в вашем веб-приложении или для рассылки
+уведомлений).
+В связи с этим Spring Email предоставляет API только для отправки писем.
 
-![Spring Email Scheme](images/05-spring-email-scheme.jpg)
+*Интересный факт* - в разработке Spring Mail принимал участие
+наш земляк - [Дмитрий Копыленко][twitter-dima767].
 
-**todo На картинке ошибка в наименовании `MimeMessagePreparator`**
+![Spring Email Scheme](images/05-spring-email-scheme.png)
 
-Основные сущности:
-- `JavaMailSender` - основной класс, связывающий Java-код с почтовым
-сервером. Заменяет собой сессию и транспорт из Jakarta Mail.
-Для работы необходимо создать бин этого класса и передать ему настройки
-почтового сервера при конфигурации.
-- `MimeMessageHelper` - обертка над `MimeMessage`, изолирующая 
-объект письма от кучи ненужных методов.
-- `MimeMessagePreparator` - интерфейс, предназначенный для заполнения шаблонных
-полей у сообщений.
-Является функциональным интерфейсом и может быть заменен лямдой `Consumer`,
+Библиотека Spring Email предоставляет ряд классов и интерфейсов, которые
+хорошо вписываются в общую концепцию фреймворка.
+Все что нужно для отправки электронного сообщения из вашего кода, это 
+заинжектить бин отправителя и передать ему письмо с помощью метода `send()`.
+
+В библиотеке выделяются два вида писем: простые и MIME-письма.
+Простые не могут содержать в своем теле ничего кроме текста, MIME-письма 
+могут содержать в теле html-верстку, изображения и иметь вложения. 
+
+### Отправка простых писем
+
+Простые письма представлены классом `SimpleMailMessage`. 
+Этот класс полностью независим от сущностей библиотеки Jakarta Mail - все
+его методы принимают примитивы и объекты стандартной библиотеки Java.
+```java
+final SimpleMailMessage simpleMail = new SimpleMailMessage();
+simpleMail.setFrom("artem.boiar@yandex.ru");
+simpleMail.setTo("yegor.bugaenko@huawei.com");
+simpleMail.setSubject("Java 20 new hot features");
+simpleMail.setText("Java 20 new hot features. No attachments :(");
+``` 
+Отправить созданное письмо можно с помощью бина интерфейса `MailSender`.
+```java
+this.mailSender.send(simpleMail);
+```
+
+### Отправка MIME-писем
+
+Для работы с MIME-письмами используется класс `MimeMessage` из Jakarta Mail.
+Для тех случаев, когда требуется одинаковый интерфейс для работы с 
+простыми и MIME-письмами существует класс адаптер `MimeMailMessage`,
+который как и `SimpleMailMessage` реализует интерфейс `MailMessage`.
+
+Для создания объектов `MimeMessage` в библиотеке есть класс-помощник - 
+`MimeMessageHelper`. 
+Этот класс предоставляет удобный фасад для работы с телом письма, его
+мультимедийными вставками и вложениями.
+Пользоваться им очень просто: достаточно обернуть в него объект MIME-письма
+и задать все необходимые параметры:
+```java
+final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
+
+messageHelper.setFrom("artem.boiar@yandex.ru");
+messageHelper.setTo("artyom.boyarshinov@cosysoft.ru");
+messageHelper.setSubject("Java 20 new hot features");
+messageHelper.setText("Java 20 new hot features. Look at the attachment.\nAlso look at my great cat!");
+messageHelper.addInline("", FileUtils.getImage());
+messageHelper.addAttachment("java-new-features.txt", FileUtils.getFile());
+``` 
+Таким образом `MimeMessageHelper` избавляет разработчика от необходимости 
+создания `BodyPart`, и их сборки в `Multipart`, 
+предоставляя удобное линейное API.
+
+Для отправки MIME-писем используется бин интерфейса `JavaMailSender`:
+```java
+this.javaMailSender.send(mimeMessage);
+```
+
+Помимо всего прочего в Spring Email существует callback-интерфейс для
+создания MIME-писем - `MimeMessagePreparator`.
+Этот интерфейс является функциональным и может быть заменен лямбдой `Consumer`,
 принимающей `MimeMessage`.
-- `SimpleMailMessage` - класс, представляющий электронное письмо без вложений.
-Представляет собой `MimeMessage` с облегченным интерфейсом.
+
+```java
+final MimeMessagePreparator preparator = mimeMessage -> {
+    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
+
+    messageHelper.setFrom("artem.boiar@yandex.ru");
+    messageHelper.setTo("vlad.mihalcea@hibernate.com");
+    messageHelper.setSubject("Java 20 new hot features");
+    messageHelper.setText("Java 20 new hot features. Look at the attachment");
+    messageHelper.addAttachment("java-new-features.txt", FileUtils.getFile());
+};
+```
+
+### Обработка исключений
+
+В отличие от Jakarta Mail, все методы Spring Email бросают непроверяемые
+исключения.
+Эти исключения являются runtime обертками над проверяемыми исключениями
+Jakarta Mail.
+
+Особый интерес представляет исключение `MailSendException`.
+Оно позволяет извлечь конкретные письма, при отправке которых были
+инициированы исключения, с помощью метода `getFailedMessages()`:
+```java
+catch (MailSendException exc) {
+    Map<Object, Exception> exceptionsByMails = exc.getFailedMessages();
+    //...
+}
+``` 
+
+### Настройка Spring Mail
+
+Spring Email предоставляет удобный способ настройки соединения с SMTP сервером 
+посредством обычного `application.properties` / `application.yml` -файла. 
+Это упрощает настройку отправителя электронных писем, так как бин 
+`JavaMailSenderImpl` конфигурируется самостоятельно при поднятии
+контекста. 
+```yaml
+spring:
+  mail:
+    protocol: smtps
+    host: smtp.yandex.ru
+    port: 465
+    username: artem.boiar
+    password: passw0rd
+```
 
 -------------------------------------------------
 ## Список источников и полезных ресурсов
 #### 1 часть
 * В. Олифер, Н. Олифер. Компьютерные сети.
-* Википедия. [Электронная почта][wiki-email]
-* Хабр. [Протоколы верхнего уровня][habr-protocols]
+* Википедия. [Электронная почта][wiki-email].
+* Хабр. [Протоколы верхнего уровня][habr-protocols].
 
 [wiki-email]: https://ru.wikipedia.org/wiki/%D0%AD%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE%D0%BD%D0%BD%D0%B0%D1%8F_%D0%BF%D0%BE%D1%87%D1%82%D0%B0
 [habr-protocols]: https://habr.com/ru/post/307714/
 
 #### 2 часть
-* [Официальная документация][jakarta-mail-docs]
-* [Github репозиторий][jakarta-mail-git]
-* [Настройки почтовых серверов][mail-properties]
+* [Официальная документация][jakarta-mail-docs] на Jakarta Mail.
+* [Github репозиторий][jakarta-mail-git] Jakarta Mail.
+* [Настройки почтовых серверов][mail-properties].
 * Книга Eliote Rusty Harold. JavaMail API - 2013.
 
 [mail-properties]: https://javaee.github.io/javamail/docs/api/overview-summary.html
@@ -511,11 +614,12 @@ final Message[] foundMessages = folder.search(termsSummary);
 [javax-mail-info]: http://java-online.ru/javax-mail.xhtml
 
 #### 3 часть
-* [Официальная документация][spring-email-docs]
-* [Гайд по Spring Email][baeldung-spring-email] на Baeldung
-* [Видеоурок по отправке писем с помощью Spring Email][spring-email-videolesson]
+* [Официальная документация][spring-email-docs] на Spring Email.
+* [Гайд по Spring Email][baeldung-spring-email] на Baeldung.
+* [Видеоурок по отправке писем с помощью Spring Email][spring-email-videolesson].
 
 [habr-spring-email]: https://habr.com/ru/post/439176/
 [spring-email-docs]: https://docs.spring.io/spring/docs/5.1.18.BUILD-SNAPSHOT/spring-framework-reference/integration.html#mail
 [baeldung-spring-email]: https://www.baeldung.com/spring-email
 [spring-email-videolesson]: https://www.youtube.com/watch?v=yBXs_gtSmUc&t=1s&ab_channel=letsCode
+[twitter-dima767]: https://twitter.com/dima767

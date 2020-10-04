@@ -32,8 +32,8 @@ public class MailController {
         messageHelper.setFrom("artem.boiar@yandex.ru");
         messageHelper.setTo("artyom.boyarshinov@cosysoft.ru");
         messageHelper.setSubject("Java 20 new hot features");
-        messageHelper.setText("Java 20 new hot features. Look at the attachment");
-
+        messageHelper.setText("Java 20 new hot features. Look at the attachment.\nAlso look at my great cat!");
+        messageHelper.addInline("", FileUtils.getImage());
         messageHelper.addAttachment("java-new-features.txt", FileUtils.getFile());
 
         this.mailSender.send(mimeMessage);
